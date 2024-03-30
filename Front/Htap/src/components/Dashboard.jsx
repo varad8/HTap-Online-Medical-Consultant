@@ -7,7 +7,9 @@ function Dashboard() {
     <>
       <SidebarDashboard />
       <div className="bg-white h-screen">
-        <div className="container mx-auto pt-5 sm:pt-10 px-4 ">
+        <div className="container mx-auto ">
+          {" "}
+          {/*pt-5 sm:pt-10 px-4 */}
           <div className="ml-0 sm:ml-64 ">
             <Outlet />
           </div>

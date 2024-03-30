@@ -8,6 +8,7 @@ import {
   faArrowRight,
   faBars,
   faBookMedical,
+  faBullhorn,
   faCheck,
   faCheckCircle,
   faDatabase,
@@ -329,7 +330,7 @@ function SidebarDashboard() {
                 }`}
               >
                 <FontAwesomeIcon
-                  icon={faMessage}
+                  icon={faBullhorn}
                   className="w-6 h-6 text-violet-500"
                 />
                 <span className="flex-1 ml-3 whitespace-nowrap">
