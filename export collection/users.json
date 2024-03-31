@@ -1,0 +1,77 @@
+[{
+  "_id": {
+    "$oid": "65f07bd5aeef8662595719fe"
+  },
+  "username": "Varad Nikharag",
+  "email": "varadnikharage201@gmail.com",
+  "password": "$2b$10$TFSWa49H30D0bbq0qYiNlu2Ca3AogrluJQCq.swQUEkb4cyBt1lHS",
+  "role": "user",
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1710259157377"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1711043132765"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "65f07bf9aeef866259571a05"
+  },
+  "username": "Simran Mehta",
+  "email": "simran@gmail.com",
+  "password": "$2b$10$vKKX4UMEI9rcsA.OlossiuhKUpwimtMw0zrhPggtZzotAEhgZS1Re",
+  "role": "doctor",
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1710259193100"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1711471504407"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "65f295ecb8ac885fea211feb"
+  },
+  "username": "HTap",
+  "email": "htap@gmail.com",
+  "password": "$2b$10$mDx9TpufGYEhp7HWE1UnYOwiyhzqfvQDfAbInlbNwofpScmaT.8eW",
+  "role": "admin",
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1710396908733"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1710597133987"
+    }
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6603b2417aab0825fd6025cd"
+  },
+  "username": "SnehaMohite",
+  "email": "snehamohite@gmail.com",
+  "password": "$2b$10$v/.jxRtO3M93j3RG.pg.I.NTNV.zYhutlUVZzpR51Ymp4QOKHhRru",
+  "role": "doctor",
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1711518273885"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1711518273885"
+    }
+  },
+  "__v": 0
+}]

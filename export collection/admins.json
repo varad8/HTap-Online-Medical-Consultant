@@ -1,0 +1,24 @@
+[{
+  "_id": {
+    "$oid": "65f2967fb8ac885fea211ff2"
+  },
+  "aid": "65f295ecb8ac885fea211feb",
+  "a_username": "HTap",
+  "a_firstname": "Htap",
+  "a_lastname": "PVT LTD",
+  "a_address": "at post ratnagiri",
+  "a_email": "tap@gmail.com",
+  "a_contact": "at post ratnagiri",
+  "a_profile_pic": "1711090070367_chatbot.png",
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1710397055626"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1711090490503"
+    }
+  },
+  "__v": 0
+}]

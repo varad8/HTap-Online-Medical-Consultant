@@ -1,0 +1,73 @@
+[{
+  "_id": {
+    "$oid": "65f5a690931a8b61514a4ec4"
+  },
+  "name": "Cardiologist",
+  "description": "A cardiologist is a medical doctor who specializes in treating heart and cardiovascular diseases. They diagnose and provide treatment for conditions such as heart attacks, heart failure, and arrhythmias. Cardiologists may perform procedures like angioplasty, stent placement, and heart catheterization.",
+  "link": "https://cdn-icons-png.flaticon.com/64/10154/10154414.png",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "65f5a83440c190a190568e11"
+  },
+  "name": "Pediatrics",
+  "description": "Pediatricians are doctors who specialize in the medical care of infants, children, and adolescents. They provide preventive care, diagnose and treat illnesses, and monitor growth and development milestones. Pediatricians also offer guidance to parents on nutrition, safety, and overall well-being of their children.",
+  "link": "https://cdn-icons-png.flaticon.com/64/11517/11517454.png",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "65f5a88d40c190a190568e13"
+  },
+  "name": "Surgery",
+  "description": "Surgeons are highly trained physicians who perform surgical procedures to treat injuries, diseases, and deformities through operative interventions. They specialize in various fields such as general surgery, orthopedic surgery, neurosurgery, and cardiovascular surgery. Surgeons assess patients, plan and perform surgeries, and provide post-operative care to ensure optimal recovery.",
+  "link": "https://cdn-icons-png.flaticon.com/64/3030/3030924.png",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "65f5a8e540c190a190568e15"
+  },
+  "name": "Neurology",
+  "description": "Neurologists are medical doctors who specialize in diagnosing and treating disorders of the nervous system, including the brain, spinal cord, nerves, and muscles. They evaluate and manage conditions such as epilepsy, stroke, multiple sclerosis, Alzheimer's disease, and Parkinson's disease. Neurologists use various diagnostic tests and treatments, including medications, physical therapy, and surgical interventions, to help patients manage their neurological conditions and improve their quality of life.",
+  "link": "https://cdn-icons-png.flaticon.com/64/3974/3974908.png",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "65f5a96440c190a190568e17"
+  },
+  "name": "Dermatology",
+  "description": "Dermatologists are medical doctors who specialize in diagnosing and treating disorders of the skin, hair, and nails. They address a wide range of conditions such as acne, eczema, psoriasis, skin cancer, and dermatitis. Dermatologists perform skin examinations, prescribe medications, and may perform procedures like biopsies, excisions, and laser therapy to treat various dermatological conditions and improve skin health.",
+  "link": "https://cdn-icons-png.flaticon.com/64/10154/10154264.png",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "65f5a9dd40c190a190568e19"
+  },
+  "name": "Physical therapy",
+  "description": "Physical therapists are healthcare professionals who help patients improve mobility, relieve pain, and restore or enhance physical function through exercise, manual therapy, and other interventions. They work with individuals of all ages who have injuries, disabilities, or illnesses, such as musculoskeletal injuries, neurological disorders, or chronic conditions. Physical therapists develop personalized treatment plans, educate patients on exercises and techniques to improve strength and flexibility, and monitor progress to optimize recovery and overall well-being.",
+  "link": "https://cdn-icons-png.flaticon.com/64/3209/3209017.png",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "65f5aa3e40c190a190568e1b"
+  },
+  "name": "Dentist",
+  "description": "Dentists are healthcare professionals who specialize in oral health, focusing on diagnosing, preventing, and treating conditions affecting the teeth, gums, and mouth. They perform regular dental check-ups, cleanings, and examinations, as well as provide treatments such as fillings, root canals, and tooth extractions. Dentists also offer cosmetic procedures like teeth whitening and dental implants to enhance the appearance of teeth and improve oral function. Regular visits to the dentist are essential for maintaining oral health and preventing dental problems.",
+  "link": "https://cdn-icons-png.flaticon.com/64/2858/2858062.png",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "65f5aa8f40c190a190568e1d"
+  },
+  "name": "General",
+  "description": "General medical checkups, also known as routine physical examinations, are comprehensive health assessments performed by healthcare providers to evaluate a person's overall health status. During these checkups, healthcare professionals typically review medical history, assess vital signs like blood pressure and heart rate, conduct physical examinations, and order laboratory tests as needed to screen for conditions such as high cholesterol, diabetes, and infections. General medical checkups also provide an opportunity for patients to discuss any health concerns or symptoms they may have and receive guidance on preventive care and healthy lifestyle habits to maintain optimal well-being. Regular checkups are essential for early detection and management of health issues and for promoting long-term health and wellness.",
+  "link": "https://cdn-icons-png.flaticon.com/64/2853/2853863.png",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "65fd6cc5e7138d4b547efbf5"
+  },
+  "name": "Optician",
+  "description": "Opticians specialize in providing eyewear solutions such as glasses and contact lenses. They assess vision needs, prescribe corrective lenses, and assist in selecting frames or lenses that suit individual preferences and prescriptions.",
+  "link": "https://cdn-icons-png.flaticon.com/64/2297/2297197.png",
+  "__v": 0
+}]
