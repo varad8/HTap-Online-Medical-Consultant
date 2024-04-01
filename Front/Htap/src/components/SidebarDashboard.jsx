@@ -14,6 +14,7 @@ import {
   faDatabase,
   faHamburger,
   faHistory,
+  faHome,
   faLayerGroup,
   faListUl,
   faMessage,
@@ -183,6 +184,22 @@ function SidebarDashboard() {
           </div>
 
           <ul className="space-y-2 mt-2">
+            {/* Home */}
+            <li>
+              <Link
+                to={`/`}
+                className={`flex items-center p-2 text-base font-inter font-normal text-violet-900 rounded-lg dark:text-white group ${
+                  location.pathname === "/" ? "bg-violet-100" : ""
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={faHome}
+                  className="w-6 h-6 text-violet-500"
+                />
+                <span className="ml-3">Home</span>
+              </Link>
+            </li>
+
             {/* OVerview */}
             <li>
               <Link

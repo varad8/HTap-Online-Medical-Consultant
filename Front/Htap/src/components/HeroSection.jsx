@@ -141,7 +141,7 @@ function HeroSection() {
         />
       )}
       <div className="relative bg-white pb-10 lg:mb-10 xl:mb-10 mb-40">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-5">
+        <div className="flex flex-col md:flex-row  justify-between mb-5">
           <div className="text-center md:text-left md:w-1/2 mx-10">
             <h1 className="lg:text-6xl xl:text-6xl text-4xl font-inter leading-normal">
               Find your doctor and make an appointment
@@ -159,6 +159,8 @@ function HeroSection() {
             />
           </div>
         </div>
+
+        {/* Doctor search container */}
         <div className="absolute w-full -bottom-1/4 lg:bottom-1 xl:bottom-1 xl:left-20 xl:w-1/2 lg:left-20 lg:w-1/2 shadow-lg border border-gray-100 rounded-md bg-white p-4">
           <div className="flex items-center gap-3">
             <h3 className="text-lg font-inter font-semibold">
