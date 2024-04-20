@@ -21,6 +21,10 @@ const {
   getChartOfAllBookingsDID,
   updateBookingStatus,
   cancelBookingById,
+  getChartDataByVisitingStatusAndPID,
+  WeeklyDataPID,
+  MonthlyDataPID,
+  YearlyDataPID,
 } = require("./operations/booking");
 
 const {
@@ -35,6 +39,7 @@ const {
   fetchPaymentsForOrder,
   fetchChartPayments,
   fetchAllPaymentsBYPID,
+  sendInvoice,
 } = require("./PaymentCotroller");
 
 const {
@@ -138,7 +143,7 @@ router.post("/login", async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign({ userId: user._id }, SECRET_KEY, {
-      expiresIn: "1h",
+      expiresIn: "24h",
     });
 
     const userdata = {
@@ -387,6 +392,11 @@ router.route("/payment/:pid").get(authenticateToken, fetchAllPaymentsBYPID);
 router
   .route("/booking/chart/:pid")
   .get(authenticateToken, getChartOfAllBookingsPID);
+
+router
+  .route("/booking/visiting/chart/:pid")
+  .get(authenticateToken, getChartDataByVisitingStatusAndPID);
+
 router
   .route("/prescriptions/chart/:pid")
   .get(authenticateToken, getPrescriptionChartByPID);
@@ -483,7 +493,7 @@ router.post("/sendmessage", authenticateToken, async (req, res) => {
     // Send the email
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
-        res.status(500).json({ error: error.message });
+        // res.status(500).json({ error: error.message });
         return res.status(500).json({ error: "Error sending email" });
       } else {
         res.status(200).json({
@@ -496,5 +506,10 @@ router.post("/sendmessage", authenticateToken, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+router.route("/reports/weekly/:pid").get(authenticateToken, WeeklyDataPID);
+router.route("/reports/monthly/:pid").get(authenticateToken, MonthlyDataPID);
+router.route("/reports/yearly/:pid").get(authenticateToken, YearlyDataPID);
+router.route("/invoice/send/:pay_id").get(authenticateToken, sendInvoice);
 
 module.exports = router;

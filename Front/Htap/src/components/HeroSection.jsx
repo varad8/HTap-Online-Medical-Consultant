@@ -142,7 +142,7 @@ function HeroSection() {
       )}
       <div className="relative bg-white pb-10 lg:mb-10 xl:mb-10 mb-40">
         <div className="flex flex-col md:flex-row  justify-between mb-5">
-          <div className="text-center md:text-left md:w-1/2 mx-10">
+          <div className="text-center md:text-left md:w-1/2 mx-10 mt-16">
             <h1 className="lg:text-6xl xl:text-6xl text-4xl font-inter leading-normal">
               Find your doctor and make an appointment
             </h1>

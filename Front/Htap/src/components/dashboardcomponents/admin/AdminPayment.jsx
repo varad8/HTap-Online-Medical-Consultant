@@ -86,9 +86,48 @@ function AdminPayment() {
     );
   });
 
+  const handleSendInVoce = async (data) => {
+    console.log(data);
+
+    try {
+      const response = await axios.get(
+        `${endpoint}/doctor/invoice/send/${data}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success(response.data.message, {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    } catch (error) {
+      toast.error(error.response.data.error, {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4 font-inter">My Bookings</h2>
+      <h2 className="text-2xl font-bold mb-4 font-inter">All Payments</h2>
       <div className="mb-4 grid lg:grid-cols-4 xl:grid-cols-4 grid-cols-2 gap-3">
         <input
           type="text"
@@ -239,6 +278,16 @@ function AdminPayment() {
                   <p>{payment.doctor.d_contact}</p>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  handleSendInVoce(payment?.pay_id);
+                }}
+                className="bg-indigo-500 px-4 py-1 rounded-lg text-white mt-3"
+              >
+                Send Invoice
+              </button>
             </div>
           </div>
         ))}

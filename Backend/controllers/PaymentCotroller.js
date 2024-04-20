@@ -1,12 +1,22 @@
 const fs = require("fs");
 const ejs = require("ejs");
 const nodemailer = require("nodemailer");
-
+const { EMAIL_USER, EMAIL_PASSWORD, YOUR_EMAIL } = process.env;
 const moment = require("moment");
 const Razorpay = require("razorpay");
 const Payment = require("../models/Payment");
 const Prescription = require("../models/Prescription");
 const { RAZORPAY_ID_KEY, RAZORPAY_SECRET_KEY } = process.env;
+const pdf = require("html-pdf");
+
+// Configure nodemailer with your email transport settings
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: EMAIL_USER,
+    pass: EMAIL_PASSWORD,
+  },
+});
 
 const razorpayInstance = new Razorpay({
   key_id: RAZORPAY_ID_KEY,
@@ -36,8 +46,6 @@ const createOrder = async (req, res) => {
 };
 
 const fetchPaymentsForOrder = async (req, res) => {
-  console.log("Im Call");
-
   try {
     const { prescription, paydata } = req.body;
 
@@ -105,20 +113,33 @@ const fetchChartPayments = async (req, res) => {
         $match: { pid },
       },
       {
+        $lookup: {
+          from: "doctors",
+          localField: "d_id",
+          foreignField: "d_id",
+          as: "doctor",
+        },
+      },
+      {
         $group: {
           _id: {
             month_year: {
               $dateToString: { format: "%Y-%m", date: "$createdAt" },
             },
+            d_id: "$d_id",
           },
           count: { $sum: 1 }, // Count the number of payments
           totalAmount: { $sum: "$pay_amount" }, // Calculate the total amount of payments
+          doctor: { $first: "$doctor" }, // Preserve doctor details for each payment
         },
       },
       {
         $project: {
           _id: 0,
           label: "$_id.month_year",
+          d_id: "$_id.d_id",
+          d_firstname: { $arrayElemAt: ["$doctor.d_firstname", 0] },
+          d_lastname: { $arrayElemAt: ["$doctor.d_lastname", 0] },
           count: 1,
           totalAmount: 1,
         },
@@ -133,11 +154,19 @@ const fetchChartPayments = async (req, res) => {
 
 const fetchChartPaymentsByDID = async (req, res) => {
   try {
-    const { d_id } = req.params;
+    const { did } = req.params;
 
     const result = await Payment.aggregate([
       {
-        $match: { d_id },
+        $match: { d_id: did },
+      },
+      {
+        $lookup: {
+          from: "doctors",
+          localField: "d_id",
+          foreignField: "d_id",
+          as: "doctor",
+        },
       },
       {
         $group: {
@@ -145,15 +174,20 @@ const fetchChartPaymentsByDID = async (req, res) => {
             month_year: {
               $dateToString: { format: "%Y-%m", date: "$createdAt" },
             },
+            d_id: "$d_id",
           },
-          count: { $sum: 1 },
-          totalAmount: { $sum: "$pay_amount" },
+          count: { $sum: 1 }, // Count the number of payments
+          totalAmount: { $sum: "$pay_amount" }, // Calculate the total amount of payments
+          doctor: { $first: "$doctor" }, // Preserve doctor details for each payment
         },
       },
       {
         $project: {
           _id: 0,
           label: "$_id.month_year",
+          d_id: "$_id.d_id",
+          d_firstname: { $arrayElemAt: ["$doctor.d_firstname", 0] },
+          d_lastname: { $arrayElemAt: ["$doctor.d_lastname", 0] },
           count: 1,
           totalAmount: 1,
         },
@@ -224,22 +258,33 @@ const fetchAllChartPayment = async (req, res) => {
   try {
     const result = await Payment.aggregate([
       {
+        $lookup: {
+          from: "doctors",
+          localField: "d_id",
+          foreignField: "d_id",
+          as: "doctor",
+        },
+      },
+      {
         $group: {
           _id: {
             month_year: {
               $dateToString: { format: "%Y-%m", date: "$createdAt" },
             },
-            d_id: "$d_id", // Include the doctor ID
+            d_id: "$d_id",
           },
-          count: { $sum: 1 },
-          totalAmount: { $sum: "$pay_amount" },
+          count: { $sum: 1 }, // Count the number of payments
+          totalAmount: { $sum: "$pay_amount" }, // Calculate the total amount of payments
+          doctor: { $first: "$doctor" }, // Preserve doctor details for each payment
         },
       },
       {
         $project: {
           _id: 0,
           label: "$_id.month_year",
-          d_id: "$_id.d_id", // Include the doctor ID
+          d_id: "$_id.d_id",
+          d_firstname: { $arrayElemAt: ["$doctor.d_firstname", 0] },
+          d_lastname: { $arrayElemAt: ["$doctor.d_lastname", 0] },
           count: 1,
           totalAmount: 1,
         },
@@ -277,6 +322,208 @@ const fetchAllPayments = async (req, res) => {
   }
 };
 
+const sendInvoice = async (req, res) => {
+  try {
+    const { pay_id } = req.params;
+
+    // Populate the `patient`, `doctor`, and `booking` fields
+    const invoiceData = await Payment.findOne({ pay_id: pay_id })
+      .populate("patient")
+      .populate("doctor")
+      .populate("booking");
+
+    if (!invoiceData) {
+      return res.status(404).json({ error: "Invoice not found" });
+    }
+
+    // Retrieve patient's email
+    const patientEmail = invoiceData.patient.p_email;
+
+    // Prepare HTML content for the email
+    const htmlContent = `
+      <html>
+      <head>
+        <style>
+          table {
+            border-collapse: collapse;
+            width: 100%;
+          }
+          th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+          }
+          th {
+            background-color: #f2f2f2;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Invoice Details</h2>
+        <table>
+          <tr>
+            <th>Field</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td>Payment ID</td>
+            <td>${invoiceData.pay_id}</td>
+          </tr>
+          <tr>
+            <td>Appointment ID</td>
+            <td>${invoiceData.appointment_id}</td>
+          </tr>
+          <tr>
+            <td>Pay Date</td>
+            <td>${invoiceData.payDate}</td>
+          </tr>
+          <tr>
+            <td>Payment Status</td>
+            <td>${invoiceData.pay_status}</td>
+          </tr>
+          <tr>
+            <td>Payment Amount</td>
+            <td>${invoiceData.pay_amount}</td>
+          </tr>
+          <tr>
+            <td>Payment Type</td>
+            <td>${invoiceData.pay_type}</td>
+          </tr>
+
+        </table>
+
+        <h2>Booking Details</h2>
+        <table>
+          <tr>
+            <th>Field</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td>Appointment ID</td>
+            <td>${invoiceData.booking.appointment_id}</td>
+          </tr>
+          <tr>
+            <td>Patient Name</td>
+            <td>${invoiceData.patient.p_firstname} ${invoiceData.patient.p_lastname}</td>
+          </tr>
+          <tr>
+            <td>Doctor Name</td>
+            <td>${invoiceData.doctor.d_firstname} ${invoiceData.doctor.d_lastname}</td>
+          </tr>
+          <tr>
+            <td>Patient Problem</td>
+            <td>${invoiceData.booking.patient_problem}</td>
+          </tr>
+          <tr>
+            <td>Visiting Status</td>
+            <td>${invoiceData.booking.visiting_status}</td>
+          </tr>
+          <tr>
+            <td>Booking Status</td>
+            <td>${invoiceData.booking.booking_status}</td>
+          </tr>
+       
+        </table>
+
+        <h2>Patient Details</h2>
+        <table>
+          <tr>
+            <th>Field</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td>First Name</td>
+            <td>${invoiceData.patient.p_firstname}</td>
+          </tr>
+          <tr>
+            <td>Last Name</td>
+            <td>${invoiceData.patient.p_lastname}</td>
+          </tr>
+          <tr>
+            <td>Email</td>
+            <td>${invoiceData.patient.p_email}</td>
+          </tr>
+          <tr>
+            <td>Address</td>
+            <td>${invoiceData.patient.p_add}</td>
+          </tr>
+          <tr>
+            <td>Location</td>
+            <td>${invoiceData.patient.p_location.city}, ${invoiceData.patient.p_location.state}</td>
+          </tr>
+      
+        </table>
+
+        <h2>Doctor Details</h2>
+        <table>
+          <tr>
+            <th>Field</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td>First Name</td>
+            <td>${invoiceData.doctor.d_firstname}</td>
+          </tr>
+          <tr>
+            <td>Last Name</td>
+            <td>${invoiceData.doctor.d_lastname}</td>
+          </tr>
+          <tr>
+            <td>Email</td>
+            <td>${invoiceData.doctor.d_email}</td>
+          </tr>
+          <tr>
+            <td>Address</td>
+            <td>${invoiceData.doctor.d_address}</td>
+          </tr>
+          <tr>
+            <td>Location</td>
+            <td>${invoiceData.doctor.d_location.city}, ${invoiceData.doctor.d_location.state}</td>
+          </tr>
+       
+        </table>
+      </body>
+      </html>
+    `;
+
+    // Generate PDF from HTML content
+    pdf.create(htmlContent).toBuffer(async (err, buffer) => {
+      if (err) {
+        console.error("Error generating PDF:", err);
+        return res.status(500).json({ error: "Failed to generate PDF" });
+      }
+
+      // Prepare email options
+      const mailOptions = {
+        from: YOUR_EMAIL,
+        to: patientEmail,
+        subject: "Invoice",
+        html: htmlContent,
+        attachments: [
+          {
+            filename: "invoice.pdf",
+            content: buffer,
+          },
+        ],
+      };
+
+      // Send email with PDF attachment
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Error sending email:", error);
+          return res.status(500).json({ error: "Failed to send email" });
+        }
+        console.log("Email sent:", info.response);
+        res.status(200).json({ message: "Invoice sent successfully" });
+      });
+    });
+  } catch (error) {
+    // Handle any errors that occur during the process
+    console.error("Error sending invoice:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   createOrder,
   fetchPaymentsForOrder,
@@ -286,4 +533,5 @@ module.exports = {
   fetchAllPaymentsBYDID,
   fetchAllChartPayment,
   fetchAllPayments,
+  sendInvoice,
 };

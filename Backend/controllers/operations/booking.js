@@ -1,5 +1,6 @@
 const Booking = require("../../models/Booking");
 const moment = require("moment");
+const Payment = require("../../models/Payment");
 
 // Function to generate unique appointment ID
 async function generateAppointmentId() {
@@ -349,14 +350,23 @@ exports.getChartOfAllBookings = async (req, res) => {
     // Aggregate bookings data to group by month, year, and d_id
     const result = await Booking.aggregate([
       {
+        $lookup: {
+          from: "doctors",
+          localField: "d_id",
+          foreignField: "d_id",
+          as: "doctor",
+        },
+      },
+      {
         $group: {
           _id: {
             month_year: {
               $dateToString: { format: "%Y-%m", date: "$scheduletime" },
             },
-            d_id: "$d_id",
+            d_id: "$d_id", // Preserve d_id for each booking
           },
           count: { $sum: 1 },
+          doctor: { $first: { $arrayElemAt: ["$doctor", 0] } }, // Extract the first document of the array
         },
       },
       {
@@ -364,6 +374,9 @@ exports.getChartOfAllBookings = async (req, res) => {
           _id: 0,
           label: "$_id.month_year",
           d_id: "$_id.d_id",
+          doctor_name: {
+            $concat: ["$doctor.d_firstname", " ", "$doctor.d_lastname"],
+          },
           data: "$count",
         },
       },
@@ -371,6 +384,7 @@ exports.getChartOfAllBookings = async (req, res) => {
 
     res.status(200).json(result);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -386,12 +400,76 @@ exports.getChartOfAllBookingsPID = async (req, res) => {
         $match: { pid: pid },
       },
       {
+        $lookup: {
+          from: "doctors",
+          localField: "d_id",
+          foreignField: "d_id",
+          as: "doctor",
+        },
+      },
+      {
         $group: {
           _id: {
             month_year: {
               $dateToString: { format: "%Y-%m", date: "$scheduletime" },
             },
             pid: "$pid",
+            d_id: "$d_id", // Preserve d_id for each booking
+          },
+          count: { $sum: 1 },
+          doctor: { $first: { $arrayElemAt: ["$doctor", 0] } }, // Extract the first document of the array
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          label: "$_id.month_year",
+          pid: "$_id.pid",
+          d_id: "$_id.d_id",
+          doctor_name: {
+            $concat: ["$doctor.d_firstname", " ", "$doctor.d_lastname"],
+          },
+          data: "$count",
+        },
+      },
+    ]);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Route handler for getting chart data of all bookings according to visiting status, month, year, and pid
+exports.getChartDataByVisitingStatusAndPID = async (req, res) => {
+  try {
+    const { pid } = req.params;
+
+    // Aggregate bookings data to group by month, year, d_id, doctorname, and visiting_status
+    const result = await Booking.aggregate([
+      {
+        $match: { pid: pid },
+      },
+      {
+        $lookup: {
+          from: "doctors",
+          localField: "d_id",
+          foreignField: "d_id",
+          as: "doctor",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            month_year: {
+              $dateToString: { format: "%Y-%m", date: "$scheduletime" },
+            },
+            d_id: "$d_id",
+            doctorname: { $arrayElemAt: ["$doctor.d_firstname", 0] },
+            d_firstname: { $arrayElemAt: ["$doctor.d_firstname", 0] }, // Include d_firstname
+            d_lastname: { $arrayElemAt: ["$doctor.d_lastname", 0] }, // Include d_lastname
+            visiting_status: "$visiting_status",
           },
           count: { $sum: 1 },
         },
@@ -400,7 +478,11 @@ exports.getChartOfAllBookingsPID = async (req, res) => {
         $project: {
           _id: 0,
           label: "$_id.month_year",
-          pid: "$_id.pid",
+          d_id: "$_id.d_id",
+          doctorname: "$_id.doctorname",
+          d_firstname: "$_id.d_firstname", // Include d_firstname
+          d_lastname: "$_id.d_lastname", // Include d_lastname
+          visiting_status: "$_id.visiting_status",
           data: "$count",
         },
       },
@@ -415,11 +497,20 @@ exports.getChartOfAllBookingsPID = async (req, res) => {
 // Route handler for getting chart data of all bookings according to d_id
 exports.getChartOfAllBookingsDID = async (req, res) => {
   try {
-    const { d_id } = req.params;
+    const { did } = req.params;
+
     // Aggregate bookings data to group by month, year, and d_id
     const result = await Booking.aggregate([
       {
-        $match: { d_id: d_id },
+        $match: { d_id: did },
+      },
+      {
+        $lookup: {
+          from: "doctors",
+          localField: "d_id",
+          foreignField: "d_id",
+          as: "doctor",
+        },
       },
       {
         $group: {
@@ -430,6 +521,7 @@ exports.getChartOfAllBookingsDID = async (req, res) => {
             d_id: "$d_id",
           },
           count: { $sum: 1 },
+          doctor: { $first: { $arrayElemAt: ["$doctor", 0] } }, // Extract the first document of the array
         },
       },
       {
@@ -437,6 +529,63 @@ exports.getChartOfAllBookingsDID = async (req, res) => {
           _id: 0,
           label: "$_id.month_year",
           d_id: "$_id.d_id",
+          doctor_name: {
+            $concat: ["$doctor.d_firstname", " ", "$doctor.d_lastname"],
+          },
+          data: "$count",
+        },
+      },
+    ]);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Route handler for getting chart data of all bookings according to visiting status, month, year, and d_id
+exports.getChartDataByVisitingStatusAndDID = async (req, res) => {
+  try {
+    const { did } = req.params;
+
+    // Aggregate bookings data to group by month, year, d_id, doctorname, and visiting_status
+    const result = await Booking.aggregate([
+      {
+        $match: { d_id: did },
+      },
+      {
+        $lookup: {
+          from: "doctors",
+          localField: "d_id",
+          foreignField: "d_id",
+          as: "doctor",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            month_year: {
+              $dateToString: { format: "%Y-%m", date: "$scheduletime" },
+            },
+            d_id: "$d_id",
+            doctorname: { $arrayElemAt: ["$doctor.d_firstname", 0] },
+            d_firstname: { $arrayElemAt: ["$doctor.d_firstname", 0] }, // Include d_firstname
+            d_lastname: { $arrayElemAt: ["$doctor.d_lastname", 0] }, // Include d_lastname
+            visiting_status: "$visiting_status",
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          label: "$_id.month_year",
+          d_id: "$_id.d_id",
+          doctorname: "$_id.doctorname",
+          d_firstname: "$_id.d_firstname", // Include d_firstname
+          d_lastname: "$_id.d_lastname", // Include d_lastname
+          visiting_status: "$_id.visiting_status",
           data: "$count",
         },
       },
@@ -445,5 +594,943 @@ exports.getChartOfAllBookingsDID = async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Route handler for getting chart data of all bookings according to visiting status and d_id
+exports.getChartDataByVisitingStatus = async (req, res) => {
+  try {
+    // Aggregate bookings data to group by month, year, doctorname, and visiting_status
+    const result = await Booking.aggregate([
+      {
+        $lookup: {
+          from: "doctors",
+          localField: "d_id",
+          foreignField: "d_id",
+          as: "doctor",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            month_year: {
+              $dateToString: { format: "%Y-%m", date: "$scheduletime" },
+            },
+            doctorname: { $arrayElemAt: ["$doctor.d_firstname", 0] },
+            d_firstname: { $arrayElemAt: ["$doctor.d_firstname", 0] }, // Include d_firstname
+            d_lastname: { $arrayElemAt: ["$doctor.d_lastname", 0] }, // Include d_lastname
+            visiting_status: "$visiting_status",
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          label: "$_id.month_year",
+          doctorname: "$_id.doctorname",
+          d_firstname: "$_id.d_firstname", // Include d_firstname
+          d_lastname: "$_id.d_lastname", // Include d_lastname
+          visiting_status: "$_id.visiting_status",
+          data: "$count",
+        },
+      },
+    ]);
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**--------------------------[Reports Monthly/weekly/yearly PID]---------------------------- */
+
+exports.WeeklyDataPID = async (req, res) => {
+  try {
+    const pid = req.params.pid;
+
+    const weekWiseData = await Payment.aggregate([
+      {
+        $match: { pid: pid }, // Match payments for the specified pid
+      },
+      {
+        $group: {
+          _id: {
+            week: { $isoWeek: "$createdAt" }, // Extract ISO week from createdAt
+            year: { $year: "$createdAt" }, // Extract year from createdAt
+          },
+          totalPayments: { $sum: "$pay_amount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "bookings", // Collection name of bookings
+          let: { week: "$_id.week", year: "$_id.year" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: [{ $isoWeek: "$createdAt" }, "$$week"] },
+                    { $eq: [{ $year: "$createdAt" }, "$$year"] },
+                  ],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "patients", // Collection name of patients
+                localField: "patient",
+                foreignField: "_id",
+                as: "patient",
+              },
+            },
+            {
+              $lookup: {
+                from: "doctors", // Collection name of doctors
+                localField: "doctor",
+                foreignField: "_id",
+                as: "doctor",
+              },
+            },
+            { $unwind: "$patient" },
+            { $unwind: "$doctor" },
+          ],
+          as: "bookings",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          weekLabel: {
+            $concat: [
+              {
+                $dateToString: {
+                  format: "%d %B",
+                  date: {
+                    $dateFromString: {
+                      dateString: "1970-01-04",
+                      format: "%Y-%m-%d",
+                    },
+                  },
+                },
+              },
+              " - ",
+              {
+                $dateToString: {
+                  format: "%d %B %Y",
+                  date: {
+                    $dateFromParts: {
+                      isoWeekYear: "$_id.year",
+                      isoWeek: "$_id.week",
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          totalPayments: 1,
+          bookings: 1,
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.week": 1 } },
+    ]);
+
+    // Send the week-wise data as a response
+    res.status(200).json({ success: true, data: weekWiseData });
+  } catch (error) {
+    console.error("Error fetching week-wise data:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+exports.MonthlyDataPID = async (req, res) => {
+  try {
+    const pid = req.params.pid;
+
+    const monthWiseData = await Payment.aggregate([
+      {
+        $match: { pid: pid }, // Match payments for the specified pid
+      },
+      {
+        $group: {
+          _id: {
+            month: { $month: "$createdAt" }, // Extract month from createdAt
+            year: { $year: "$createdAt" }, // Extract year from createdAt
+          },
+          totalPayments: { $sum: "$pay_amount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "bookings", // Collection name of bookings
+          let: { month: "$_id.month", year: "$_id.year" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: [{ $month: "$createdAt" }, "$$month"] },
+                    { $eq: [{ $year: "$createdAt" }, "$$year"] },
+                  ],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "patients", // Collection name of patients
+                localField: "patient",
+                foreignField: "_id",
+                as: "patient",
+              },
+            },
+            {
+              $lookup: {
+                from: "doctors", // Collection name of doctors
+                localField: "doctor",
+                foreignField: "_id",
+                as: "doctor",
+              },
+            },
+            { $unwind: "$patient" },
+            { $unwind: "$doctor" },
+          ],
+          as: "bookings",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          monthLabel: {
+            $dateToString: {
+              format: "%B %Y",
+              date: {
+                $dateFromParts: { year: "$_id.year", month: "$_id.month" },
+              },
+            },
+          },
+          totalPayments: 1,
+          bookings: 1,
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } },
+    ]);
+
+    // Send the month-wise data as a response
+    res.status(200).json({ success: true, data: monthWiseData });
+  } catch (error) {
+    console.error("Error fetching month-wise data:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+exports.YearlyDataPID = async (req, res) => {
+  try {
+    const pid = req.params.pid;
+
+    const yearWiseData = await Payment.aggregate([
+      {
+        $match: { pid: pid }, // Match payments for the specified pid
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" }, // Extract year from createdAt
+          },
+          totalPayments: { $sum: "$pay_amount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "bookings", // Collection name of bookings
+          let: { year: "$_id.year" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: [{ $year: "$createdAt" }, "$$year"],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "patients", // Collection name of patients
+                localField: "patient",
+                foreignField: "_id",
+                as: "patient",
+              },
+            },
+            {
+              $lookup: {
+                from: "doctors", // Collection name of doctors
+                localField: "doctor",
+                foreignField: "_id",
+                as: "doctor",
+              },
+            },
+            { $unwind: "$patient" },
+            { $unwind: "$doctor" },
+          ],
+          as: "bookings",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          year: "$_id.year",
+          totalPayments: 1,
+          bookings: 1,
+        },
+      },
+      { $sort: { year: 1 } },
+    ]);
+
+    // Send the year-wise data as a response
+    res.status(200).json({ success: true, data: yearWiseData });
+  } catch (error) {
+    console.error("Error fetching year-wise data:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+/**--------------------------[Reports Monthly/weekly/yearly DID]---------------------------- */
+exports.WeeklyDataDID = async (req, res) => {
+  try {
+    const did = req.params.did;
+
+    const weekWiseData = await Payment.aggregate([
+      {
+        $match: { d_id: did }, // Match payments for the specified d_id
+      },
+      {
+        $group: {
+          _id: {
+            week: { $isoWeek: "$createdAt" }, // Extract ISO week from createdAt
+            year: { $year: "$createdAt" }, // Extract year from createdAt
+          },
+          totalPayments: { $sum: "$pay_amount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "bookings", // Collection name of bookings
+          let: { week: "$_id.week", year: "$_id.year" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: [{ $isoWeek: "$createdAt" }, "$$week"] },
+                    { $eq: [{ $year: "$createdAt" }, "$$year"] },
+                  ],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "patients", // Collection name of patients
+                localField: "patient",
+                foreignField: "_id",
+                as: "patient",
+              },
+            },
+            {
+              $lookup: {
+                from: "doctors", // Collection name of doctors
+                localField: "doctor",
+                foreignField: "_id",
+                as: "doctor",
+              },
+            },
+            { $unwind: "$patient" },
+            { $unwind: "$doctor" },
+          ],
+          as: "bookings",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          weekLabel: {
+            $concat: [
+              {
+                $dateToString: {
+                  format: "%d %B",
+                  date: {
+                    $dateFromString: {
+                      dateString: "1970-01-04",
+                      format: "%Y-%m-%d",
+                    },
+                  },
+                },
+              },
+              " - ",
+              {
+                $dateToString: {
+                  format: "%d %B %Y",
+                  date: {
+                    $dateFromParts: {
+                      isoWeekYear: "$_id.year",
+                      isoWeek: "$_id.week",
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          totalPayments: 1,
+          bookings: 1,
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.week": 1 } },
+    ]);
+
+    // Send the week-wise data as a response
+    res.status(200).json({ success: true, data: weekWiseData });
+  } catch (error) {
+    console.error("Error fetching week-wise data:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+exports.MonthlyDataDID = async (req, res) => {
+  try {
+    const did = req.params.did;
+
+    const monthWiseData = await Payment.aggregate([
+      {
+        $match: { d_id: did }, // Match payments for the specified d_id
+      },
+      {
+        $group: {
+          _id: {
+            month: { $month: "$createdAt" }, // Extract month from createdAt
+            year: { $year: "$createdAt" }, // Extract year from createdAt
+          },
+          totalPayments: { $sum: "$pay_amount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "bookings", // Collection name of bookings
+          let: { month: "$_id.month", year: "$_id.year" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: [{ $month: "$createdAt" }, "$$month"] },
+                    { $eq: [{ $year: "$createdAt" }, "$$year"] },
+                  ],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "patients", // Collection name of patients
+                localField: "patient",
+                foreignField: "_id",
+                as: "patient",
+              },
+            },
+            {
+              $lookup: {
+                from: "doctors", // Collection name of doctors
+                localField: "doctor",
+                foreignField: "_id",
+                as: "doctor",
+              },
+            },
+            { $unwind: "$patient" },
+            { $unwind: "$doctor" },
+          ],
+          as: "bookings",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          monthLabel: {
+            $dateToString: {
+              format: "%B %Y",
+              date: {
+                $dateFromParts: { year: "$_id.year", month: "$_id.month" },
+              },
+            },
+          },
+          totalPayments: 1,
+          bookings: 1,
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } },
+    ]);
+
+    // Send the month-wise data as a response
+    res.status(200).json({ success: true, data: monthWiseData });
+  } catch (error) {
+    console.error("Error fetching month-wise data:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+exports.YearlyDataDID = async (req, res) => {
+  try {
+    const did = req.params.did;
+
+    const yearWiseData = await Payment.aggregate([
+      {
+        $match: { d_id: did }, // Match payments for the specified d_id
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" }, // Extract year from createdAt
+          },
+          totalPayments: { $sum: "$pay_amount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "bookings", // Collection name of bookings
+          let: { year: "$_id.year" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: [{ $year: "$createdAt" }, "$$year"],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "patients", // Collection name of patients
+                localField: "patient",
+                foreignField: "_id",
+                as: "patient",
+              },
+            },
+            {
+              $lookup: {
+                from: "doctors", // Collection name of doctors
+                localField: "doctor",
+                foreignField: "_id",
+                as: "doctor",
+              },
+            },
+            { $unwind: "$patient" },
+            { $unwind: "$doctor" },
+          ],
+          as: "bookings",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          year: "$_id.year",
+          totalPayments: 1,
+          bookings: 1,
+        },
+      },
+      { $sort: { year: 1 } },
+    ]);
+
+    // Send the year-wise data as a response
+    res.status(200).json({ success: true, data: yearWiseData });
+  } catch (error) {
+    console.error("Error fetching year-wise data:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+/**--------------------------[Reports Monthly/weekly/yearly ]---------------------------- */
+exports.WeeklyDataAll = async (req, res) => {
+  try {
+    const weekWiseData = await Payment.aggregate([
+      {
+        $group: {
+          _id: {
+            week: { $isoWeek: "$createdAt" }, // Extract ISO week from createdAt
+            year: { $year: "$createdAt" }, // Extract year from createdAt
+          },
+          totalPayments: { $sum: "$pay_amount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "bookings", // Collection name of bookings
+          let: { week: "$_id.week", year: "$_id.year" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: [{ $isoWeek: "$createdAt" }, "$$week"] },
+                    { $eq: [{ $year: "$createdAt" }, "$$year"] },
+                  ],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "patients", // Collection name of patients
+                localField: "patient",
+                foreignField: "_id",
+                as: "patient",
+              },
+            },
+            {
+              $lookup: {
+                from: "doctors", // Collection name of doctors
+                localField: "doctor",
+                foreignField: "_id",
+                as: "doctor",
+              },
+            },
+            { $unwind: "$patient" },
+            { $unwind: "$doctor" },
+          ],
+          as: "bookings",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          weekLabel: {
+            $concat: [
+              {
+                $dateToString: {
+                  format: "%d %B",
+                  date: {
+                    $dateFromString: {
+                      dateString: "1970-01-04",
+                      format: "%Y-%m-%d",
+                    },
+                  },
+                },
+              },
+              " - ",
+              {
+                $dateToString: {
+                  format: "%d %B %Y",
+                  date: {
+                    $dateFromParts: {
+                      isoWeekYear: "$_id.year",
+                      isoWeek: "$_id.week",
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          totalPayments: 1,
+          bookings: 1,
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.week": 1 } },
+    ]);
+
+    // Send the week-wise data as a response
+    res.status(200).json({ success: true, data: weekWiseData });
+  } catch (error) {
+    console.error("Error fetching week-wise data:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+exports.MonthlyDataAll = async (req, res) => {
+  try {
+    const monthWiseData = await Payment.aggregate([
+      {
+        $group: {
+          _id: {
+            month: { $month: "$createdAt" }, // Extract month from createdAt
+            year: { $year: "$createdAt" }, // Extract year from createdAt
+          },
+          totalPayments: { $sum: "$pay_amount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "bookings", // Collection name of bookings
+          let: { month: "$_id.month", year: "$_id.year" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: [{ $month: "$createdAt" }, "$$month"] },
+                    { $eq: [{ $year: "$createdAt" }, "$$year"] },
+                  ],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "patients", // Collection name of patients
+                localField: "patient",
+                foreignField: "_id",
+                as: "patient",
+              },
+            },
+            {
+              $lookup: {
+                from: "doctors", // Collection name of doctors
+                localField: "doctor",
+                foreignField: "_id",
+                as: "doctor",
+              },
+            },
+            { $unwind: "$patient" },
+            { $unwind: "$doctor" },
+          ],
+          as: "bookings",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          monthLabel: {
+            $dateToString: {
+              format: "%B %Y",
+              date: {
+                $dateFromParts: { year: "$_id.year", month: "$_id.month" },
+              },
+            },
+          },
+          totalPayments: 1,
+          bookings: 1,
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } },
+    ]);
+
+    // Send the month-wise data as a response
+    res.status(200).json({ success: true, data: monthWiseData });
+  } catch (error) {
+    console.error("Error fetching month-wise data:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+exports.YearlyDataAll = async (req, res) => {
+  try {
+    const yearWiseData = await Payment.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" }, // Extract year from createdAt
+          },
+          totalPayments: { $sum: "$pay_amount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "bookings", // Collection name of bookings
+          let: { year: "$_id.year" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: [{ $year: "$createdAt" }, "$$year"],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "patients", // Collection name of patients
+                localField: "patient",
+                foreignField: "_id",
+                as: "patient",
+              },
+            },
+            {
+              $lookup: {
+                from: "doctors", // Collection name of doctors
+                localField: "doctor",
+                foreignField: "_id",
+                as: "doctor",
+              },
+            },
+            { $unwind: "$patient" },
+            { $unwind: "$doctor" },
+          ],
+          as: "bookings",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          year: "$_id.year",
+          totalPayments: 1,
+          bookings: 1,
+        },
+      },
+      { $sort: { year: 1 } },
+    ]);
+
+    // Send the year-wise data as a response
+    res.status(200).json({ success: true, data: yearWiseData });
+  } catch (error) {
+    console.error("Error fetching year-wise data:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+/**--------------------------------{Reports data monthly weekly yearly doctor wise}----------------------------- */
+exports.WeeklyDataAllDoctor = async (req, res) => {
+  try {
+    const weekWiseData = await Payment.aggregate([
+      {
+        $group: {
+          _id: {
+            week: { $isoWeek: "$createdAt" }, // Extract ISO week from createdAt
+            year: { $year: "$createdAt" }, // Extract year from createdAt
+            d_id: "$d_id", // Preserve d_id for each payment
+          },
+          totalPayments: { $sum: "$pay_amount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "doctors", // Collection name of doctors
+          localField: "_id.d_id",
+          foreignField: "d_id",
+          as: "doctor",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          weekLabel: {
+            $concat: [
+              {
+                $dateToString: {
+                  format: "%d %B",
+                  date: {
+                    $dateFromString: {
+                      dateString: "1970-01-04",
+                      format: "%Y-%m-%d",
+                    },
+                  },
+                },
+              },
+              " - ",
+              {
+                $dateToString: {
+                  format: "%d %B %Y",
+                  date: {
+                    $dateFromParts: {
+                      isoWeekYear: "$_id.year",
+                      isoWeek: "$_id.week",
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          d_id: "$_id.d_id",
+          d_firstname: { $arrayElemAt: ["$doctor.d_firstname", 0] },
+          d_lastname: { $arrayElemAt: ["$doctor.d_lastname", 0] },
+          totalPayments: 1,
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.week": 1 } },
+    ]);
+
+    // Send the week-wise data as a response
+    res.status(200).json({ success: true, data: weekWiseData });
+  } catch (error) {
+    console.error("Error fetching week-wise data:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+exports.MonthlyDataAllDoctor = async (req, res) => {
+  try {
+    const monthWiseData = await Payment.aggregate([
+      {
+        $group: {
+          _id: {
+            month: { $month: "$createdAt" }, // Extract month from createdAt
+            year: { $year: "$createdAt" }, // Extract year from createdAt
+            d_id: "$d_id", // Preserve d_id for each payment
+          },
+          totalPayments: { $sum: "$pay_amount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "doctors", // Collection name of doctors
+          localField: "_id.d_id",
+          foreignField: "d_id",
+          as: "doctor",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          monthLabel: {
+            $dateToString: {
+              format: "%B %Y",
+              date: {
+                $dateFromParts: { year: "$_id.year", month: "$_id.month" },
+              },
+            },
+          },
+          d_id: "$_id.d_id",
+          d_firstname: { $arrayElemAt: ["$doctor.d_firstname", 0] },
+          d_lastname: { $arrayElemAt: ["$doctor.d_lastname", 0] },
+          totalPayments: 1,
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } },
+    ]);
+
+    // Send the month-wise data as a response
+    res.status(200).json({ success: true, data: monthWiseData });
+  } catch (error) {
+    console.error("Error fetching month-wise data:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+exports.YearlyDataAllDoctor = async (req, res) => {
+  try {
+    const yearWiseData = await Payment.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" }, // Extract year from createdAt
+            d_id: "$d_id", // Preserve d_id for each payment
+          },
+          totalPayments: { $sum: "$pay_amount" },
+        },
+      },
+      {
+        $lookup: {
+          from: "doctors", // Collection name of doctors
+          localField: "_id.d_id",
+          foreignField: "d_id",
+          as: "doctor",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          year: "$_id.year",
+          d_id: "$_id.d_id",
+          d_firstname: { $arrayElemAt: ["$doctor.d_firstname", 0] },
+          d_lastname: { $arrayElemAt: ["$doctor.d_lastname", 0] },
+          totalPayments: 1,
+        },
+      },
+      { $sort: { year: 1 } },
+    ]);
+
+    // Send the year-wise data as a response
+    res.status(200).json({ success: true, data: yearWiseData });
+  } catch (error) {
+    console.error("Error fetching year-wise data:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
   }
 };

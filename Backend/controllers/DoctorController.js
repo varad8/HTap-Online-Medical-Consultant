@@ -9,8 +9,13 @@ const bcrypt = require("bcrypt");
 const Doctor = require("../models/Doctor");
 const {
   getChartOfAllBookingsDID,
+  getChartDataByVisitingStatusAndDID,
   getAllBookingByDoctorId,
   getBookingByAppointmentId,
+  WeeklyDataDID,
+  MonthlyDataDID,
+  YearlyDataPID,
+  YearlyDataDID,
 } = require("./operations/booking");
 const {
   getAllPrescriptionUsingPID,
@@ -25,6 +30,7 @@ const {
   fetchChartPayments,
   fetchChartPaymentsByDID,
   fetchAllPaymentsBYDID,
+  sendInvoice,
 } = require("./PaymentCotroller");
 const { getNotificationByDID } = require("./operations/ratenotification");
 const { SECRET_KEY } = process.env;
@@ -101,7 +107,7 @@ router.post("/login", async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign({ userId: user._id }, SECRET_KEY, {
-      expiresIn: "1h",
+      expiresIn: "24h",
     });
     const userdata = {
       id: user._id,
@@ -322,15 +328,18 @@ router.route("/specailist/all").get(getSpecailistList);
 
 /**_______________________________[CHART START]_____________________________________ */
 router
-  .route("/booking/chart/:d_id")
+  .route("/booking/chart/:did")
   .get(authenticateToken, getChartOfAllBookingsDID);
 
+router
+  .route("/booking/visiting/chart/:did")
+  .get(authenticateToken, getChartDataByVisitingStatusAndDID);
 router
   .route("/prescription/chart/:d_id")
   .get(authenticateToken, getPrescriptionChartByDID);
 
 router
-  .route("/payment/chart/:d_id")
+  .route("/payment/chart/:did")
   .get(authenticateToken, fetchChartPaymentsByDID);
 
 /**_______________________________[END START]_____________________________________ */
@@ -371,5 +380,11 @@ router.route("/payment/:d_id").get(authenticateToken, fetchAllPaymentsBYDID);
 router
   .route("/notification/get/did/:d_id")
   .get(authenticateToken, getNotificationByDID);
+
+router.route("/invoice/send/:pay_id").get(authenticateToken, sendInvoice);
+
+router.route("/reports/weekly/:did").get(authenticateToken, WeeklyDataDID);
+router.route("/reports/monthly/:did").get(authenticateToken, MonthlyDataDID);
+router.route("/reports/yearly/:did").get(authenticateToken, YearlyDataDID);
 
 module.exports = router;

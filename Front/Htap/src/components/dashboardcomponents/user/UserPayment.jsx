@@ -36,8 +36,6 @@ function UserPayment() {
         }
       );
 
-      console.log(response.data);
-
       setPaymentData(response.data);
     } catch (error) {
       toast.error(error.response.data.error, {
@@ -88,6 +86,45 @@ function UserPayment() {
       (payment.createdAt ?? "").includes(filters.createdAt)
     );
   });
+
+  const handleSendInVoce = async (data) => {
+    console.log(data);
+
+    try {
+      const response = await axios.get(
+        `${endpoint}/users/invoice/send/${data}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success(response.data.message, {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    } catch (error) {
+      toast.error(error.response.data.error, {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -242,6 +279,16 @@ function UserPayment() {
                   <p>{payment.doctor.d_contact}</p>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  handleSendInVoce(payment?.pay_id);
+                }}
+                className="bg-indigo-500 px-4 py-1 rounded-lg text-white mt-3"
+              >
+                Get Invoice
+              </button>
             </div>
           </div>
         ))}

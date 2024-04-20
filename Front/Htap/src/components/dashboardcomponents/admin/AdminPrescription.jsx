@@ -223,7 +223,9 @@ function AdminPrescription() {
       />
 
       <div className="container mx-auto p-4">
-        <h2 className="text-2xl font-bold mb-4 font-inter">My Prescriptions</h2>
+        <h2 className="text-2xl font-bold mb-4 font-inter">
+          All Prescriptions
+        </h2>
         <div className="mb-4 grid lg:grid-cols-4 xl:grid-cols-4 grid-cols-2 gap-3">
           <input
             type="text"
@@ -348,6 +350,36 @@ function AdminPrescription() {
                       </p>
                       <p className="font-inter text-sm">
                         Address: {prescription.patient.p_add}
+                      </p>
+                    </div>
+                  </div>
+
+                  <br />
+                  <hr />
+
+                  <div className="flex  gap-4 items-center mt-3">
+                    <img
+                      src={`${endpoint}/doctor/profile/${prescription.doctor?.d_profile_pic}`}
+                      alt="Doctor profile"
+                      className="w-20 h-20 rounded-full border border-gray-300"
+                    />
+                    <div>
+                      <p className="font-inter text-sm">
+                        Doctor: {prescription.doctor.d_firstname}{" "}
+                        {prescription.doctor.d_lastname}
+                      </p>
+                      <p className="font-inter text-sm">
+                        Email: {prescription.doctor.d_email}
+                      </p>
+                      <p className="font-inter text-sm">
+                        Contact: {prescription.doctor.d_contact}
+                      </p>
+                      <p className="font-inter text-sm">
+                        Location: {prescription.doctor.d_location.city},{" "}
+                        {prescription.doctor.d_location.state}
+                      </p>
+                      <p className="font-inter text-sm">
+                        Address: {prescription.doctor.d_address}
                       </p>
                     </div>
                   </div>

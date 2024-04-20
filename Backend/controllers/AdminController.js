@@ -17,6 +17,13 @@ const nodemailer = require("nodemailer");
 const {
   getChartOfAllBookings,
   getAllBookings,
+  WeeklyDataAll,
+  MonthlyDataAll,
+  YearlyDataAll,
+  WeeklyDataAllDoctor,
+  MonthlyDataAllDoctor,
+  YearlyDataAllDoctor,
+  getChartDataByVisitingStatus,
 } = require("./operations/booking");
 const {
   getAllPrescriptionChart,
@@ -109,7 +116,7 @@ router.post("/login", async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign({ userId: user._id }, SECRET_KEY, {
-      expiresIn: "1h",
+      expiresIn: "24h",
     });
 
     const userdata = {
@@ -503,6 +510,20 @@ router
 router
   .route("/notification/get/all")
   .get(authenticateToken, getAllNotification);
+
+router
+  .route("/booking/visiting/chart")
+  .get(authenticateToken, getChartDataByVisitingStatus);
+
+router.route("/reports/weekly").get(authenticateToken, WeeklyDataAll);
+router.route("/reports/monthly").get(authenticateToken, MonthlyDataAll);
+router.route("/reports/yearly").get(authenticateToken, YearlyDataAll);
+
+router.route("/reports/weekly/all").get(authenticateToken, WeeklyDataAllDoctor);
+router
+  .route("/reports/monthly/all")
+  .get(authenticateToken, MonthlyDataAllDoctor);
+router.route("/reports/yearly/all").get(authenticateToken, YearlyDataAllDoctor);
 
 // router.route("/data/users", authenticateToken, async (req, res) => {
 //   try {
