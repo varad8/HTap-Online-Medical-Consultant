@@ -222,7 +222,11 @@ function UserBooking() {
               APT. ID {booking.appointment_id}
             </h3>
             <div className="px-3 py-2">
-              <div className="mb-2 border-b border-gary-300 px-3 py-2">
+              <div className="mb-2 border-b border-gary-300 px-3 py-2 text-sm">
+                <p>
+                  PIDe:
+                  {booking.patient.pid}
+                </p>
                 <p>
                   Schedule Time:
                   {booking.scheduletime}
@@ -241,7 +245,7 @@ function UserBooking() {
                   alt="doctor profile"
                   className="w-20 h-20 rounded-full border border-gray-300"
                 />
-                <div>
+                <div className="text-sm">
                   <p>
                     Doctor: {booking.doctor.d_firstname}
                     {booking.doctor.d_lastname}

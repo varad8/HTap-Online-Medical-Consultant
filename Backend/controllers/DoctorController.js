@@ -129,7 +129,7 @@ router.get("/profile", authenticateToken, async (req, res) => {
     // Find the doctor profile by user ID
     const doctor = await Doctor.findOne({ d_id: req.user.userId });
     if (!doctor) {
-      return res.status(404).json({ error: "doctor profile not found" });
+      return res.status(404).json({ error: "Create your profile first" });
     }
 
     res.status(200).json(doctor);
@@ -383,8 +383,8 @@ router
 
 router.route("/invoice/send/:pay_id").get(authenticateToken, sendInvoice);
 
-router.route("/reports/weekly/:did").get(authenticateToken, WeeklyDataDID);
-router.route("/reports/monthly/:did").get(authenticateToken, MonthlyDataDID);
-router.route("/reports/yearly/:did").get(authenticateToken, YearlyDataDID);
+router.route("/reports/weekly/:did").get(WeeklyDataDID);
+router.route("/reports/monthly/:did").get(MonthlyDataDID);
+router.route("/reports/yearly/:did").get(YearlyDataDID);
 
 module.exports = router;

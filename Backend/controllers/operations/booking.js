@@ -673,6 +673,7 @@ exports.WeeklyDataPID = async (req, res) => {
                   $and: [
                     { $eq: [{ $isoWeek: "$createdAt" }, "$$week"] },
                     { $eq: [{ $year: "$createdAt" }, "$$year"] },
+                    { $eq: ["$pid", pid] }, // Match bookings with the same pid
                   ],
                 },
               },
@@ -703,31 +704,15 @@ exports.WeeklyDataPID = async (req, res) => {
         $project: {
           _id: 0,
           weekLabel: {
-            $concat: [
-              {
-                $dateToString: {
-                  format: "%d %B",
-                  date: {
-                    $dateFromString: {
-                      dateString: "1970-01-04",
-                      format: "%Y-%m-%d",
-                    },
-                  },
+            $dateToString: {
+              format: "%Y-W%U", // Format for ISO week
+              date: {
+                $dateFromParts: {
+                  isoWeekYear: "$_id.year",
+                  isoWeek: "$_id.week",
                 },
               },
-              " - ",
-              {
-                $dateToString: {
-                  format: "%d %B %Y",
-                  date: {
-                    $dateFromParts: {
-                      isoWeekYear: "$_id.year",
-                      isoWeek: "$_id.week",
-                    },
-                  },
-                },
-              },
-            ],
+            },
           },
           totalPayments: 1,
           bookings: 1,
@@ -743,7 +728,6 @@ exports.WeeklyDataPID = async (req, res) => {
     res.status(500).json({ success: false, error: "Internal server error" });
   }
 };
-
 exports.MonthlyDataPID = async (req, res) => {
   try {
     const pid = req.params.pid;
@@ -772,6 +756,7 @@ exports.MonthlyDataPID = async (req, res) => {
                   $and: [
                     { $eq: [{ $month: "$createdAt" }, "$$month"] },
                     { $eq: [{ $year: "$createdAt" }, "$$year"] },
+                    { $eq: ["$pid", pid] }, // Match bookings with the same pid
                   ],
                 },
               },
@@ -853,6 +838,9 @@ exports.YearlyDataPID = async (req, res) => {
               },
             },
             {
+              $match: { pid: pid }, // Match bookings with the same pid
+            },
+            {
               $lookup: {
                 from: "patients", // Collection name of patients
                 localField: "patient",
@@ -898,7 +886,7 @@ exports.WeeklyDataDID = async (req, res) => {
   try {
     const did = req.params.did;
 
-    const weekWiseData = await Payment.aggregate([
+    const weeklyData = await Payment.aggregate([
       {
         $match: { d_id: did }, // Match payments for the specified d_id
       },
@@ -922,6 +910,7 @@ exports.WeeklyDataDID = async (req, res) => {
                   $and: [
                     { $eq: [{ $isoWeek: "$createdAt" }, "$$week"] },
                     { $eq: [{ $year: "$createdAt" }, "$$year"] },
+                    { $eq: ["$d_id", did] }, // Match bookings with the same d_id
                   ],
                 },
               },
@@ -952,31 +941,15 @@ exports.WeeklyDataDID = async (req, res) => {
         $project: {
           _id: 0,
           weekLabel: {
-            $concat: [
-              {
-                $dateToString: {
-                  format: "%d %B",
-                  date: {
-                    $dateFromString: {
-                      dateString: "1970-01-04",
-                      format: "%Y-%m-%d",
-                    },
-                  },
+            $dateToString: {
+              format: "%Y-W%U", // Format for ISO week
+              date: {
+                $dateFromParts: {
+                  isoWeekYear: "$_id.year",
+                  isoWeek: "$_id.week",
                 },
               },
-              " - ",
-              {
-                $dateToString: {
-                  format: "%d %B %Y",
-                  date: {
-                    $dateFromParts: {
-                      isoWeekYear: "$_id.year",
-                      isoWeek: "$_id.week",
-                    },
-                  },
-                },
-              },
-            ],
+            },
           },
           totalPayments: 1,
           bookings: 1,
@@ -985,10 +958,10 @@ exports.WeeklyDataDID = async (req, res) => {
       { $sort: { "_id.year": 1, "_id.week": 1 } },
     ]);
 
-    // Send the week-wise data as a response
-    res.status(200).json({ success: true, data: weekWiseData });
+    // Send the weekly data as a response
+    res.status(200).json({ success: true, data: weeklyData });
   } catch (error) {
-    console.error("Error fetching week-wise data:", error);
+    console.error("Error fetching weekly data:", error);
     res.status(500).json({ success: false, error: "Internal server error" });
   }
 };
@@ -1021,6 +994,7 @@ exports.MonthlyDataDID = async (req, res) => {
                   $and: [
                     { $eq: [{ $month: "$createdAt" }, "$$month"] },
                     { $eq: [{ $year: "$createdAt" }, "$$year"] },
+                    { $eq: ["$d_id", did] }, // Match bookings with the same d_id
                   ],
                 },
               },
@@ -1077,7 +1051,7 @@ exports.YearlyDataDID = async (req, res) => {
   try {
     const did = req.params.did;
 
-    const yearWiseData = await Payment.aggregate([
+    const yearlyData = await Payment.aggregate([
       {
         $match: { d_id: did }, // Match payments for the specified d_id
       },
@@ -1097,7 +1071,10 @@ exports.YearlyDataDID = async (req, res) => {
             {
               $match: {
                 $expr: {
-                  $eq: [{ $year: "$createdAt" }, "$$year"],
+                  $and: [
+                    { $eq: [{ $year: "$createdAt" }, "$$year"] },
+                    { $eq: ["$d_id", did] }, // Match bookings with the same d_id
+                  ],
                 },
               },
             },
@@ -1134,10 +1111,10 @@ exports.YearlyDataDID = async (req, res) => {
       { $sort: { year: 1 } },
     ]);
 
-    // Send the year-wise data as a response
-    res.status(200).json({ success: true, data: yearWiseData });
+    // Send the yearly data as a response
+    res.status(200).json({ success: true, data: yearlyData });
   } catch (error) {
-    console.error("Error fetching year-wise data:", error);
+    console.error("Error fetching yearly data:", error);
     res.status(500).json({ success: false, error: "Internal server error" });
   }
 };

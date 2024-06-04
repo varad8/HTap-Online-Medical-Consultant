@@ -321,10 +321,13 @@ function Dprescription() {
                       alt="patient profile"
                       className="w-20 h-20 rounded-full border border-gray-300"
                     />
-                    <div>
+                    <div className="text-sm">
                       <p className="font-inter text-sm">
                         Patient: {prescription.patient.p_firstname}{" "}
                         {prescription.patient.p_lastname}
+                      </p>
+                      <p className="font-inter text-sm">
+                        PID: {prescription.patient.pid}
                       </p>
                       <p className="font-inter text-sm">
                         Email: {prescription.patient.p_email}

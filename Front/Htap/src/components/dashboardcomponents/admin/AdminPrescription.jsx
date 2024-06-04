@@ -303,7 +303,7 @@ function AdminPrescription() {
                 <div className="px-3 py-2">
                   <div className="mb-2 border-b border-gary-300 px-3 py-2">
                     <p className="font-inter text-sm">
-                      Health Issue: {prescription.patient.patient_problem}
+                      Health Issue: {prescription.booking.patient_problem}
                     </p>
                     <p className="font-inter text-sm">
                       Created At: {prescription.createdAt}

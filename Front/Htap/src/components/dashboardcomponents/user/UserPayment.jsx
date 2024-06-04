@@ -225,7 +225,7 @@ function UserPayment() {
 
               <p className="text-gray-400 mt-2 mb-2">Payment Details</p>
 
-              <p className="text-gray-700 text-base">
+              <p className="text-gray-700 text-base text-sm">
                 Doctor: {payment.doctor.d_username}
                 <br />
                 Prescription ID: {payment.prescription.pres_id}
@@ -254,12 +254,13 @@ function UserPayment() {
                   className="w-14 h-14 rounded-full border border-gray-200"
                 />
 
-                <div className="flex gap-2 flex-col">
-                  <p>
+                <div className="flex gap-2 flex-col break-words">
+                  <p className="text-sm">
                     {payment.patient.p_firstname} {payment.patient.p_lastname}
                   </p>
-                  <p>{payment.patient.p_email}</p>
-                  <p>{payment.patient.p_contact}</p>
+                  <p className="text-sm">{payment.patient.pid}</p>
+                  <p className="text-sm">{payment.patient.p_email}</p>
+                  <p className="text-sm">{payment.patient.p_contact}</p>
                 </div>
               </div>
 
@@ -271,7 +272,7 @@ function UserPayment() {
                   className="w-14 h-14 rounded-full border border-gray-200"
                 />
 
-                <div className="flex gap-2 flex-col">
+                <div className="flex gap-2 flex-col text-sm">
                   <p>
                     {payment.doctor.d_firstname} {payment.doctor.d_lastname}
                   </p>

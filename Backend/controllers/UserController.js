@@ -166,7 +166,7 @@ router.get("/profile", authenticateToken, async (req, res) => {
     // Find the patient profile by user ID
     const patient = await Patient.findOne({ pid: req.user.userId });
     if (!patient) {
-      return res.status(404).json({ error: "Patient profile not found" });
+      return res.status(404).json({ error: "Create your profile first" });
     }
 
     res.status(200).json(patient);
@@ -180,7 +180,10 @@ router.post("/profile/create", authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
     if (!user) {
-      throw new Error("User not found");
+      // throw new Error("User not found");
+
+      // change it to
+      throw new Error("Create Profile");
     }
 
     // Check if a Patient profile with the same p_id already exists
@@ -342,9 +345,7 @@ router.put("/profile/update", authenticateToken, async (req, res) => {
 });
 
 /**___________________________________[Get doctor based on Location]________________________________________ */
-router
-  .route("/doctor/location")
-  .get(authenticateToken, getDoctorsByLocationAndStatus);
+router.route("/doctor/location").get(getDoctorsByLocationAndStatus);
 router.route("/doctor/details/:doctorId").get(getDoctorById);
 router.route("/specailist/all").get(getSpecailistList);
 
@@ -468,7 +469,7 @@ router
   .get(authenticateToken, getAllNotification);
 
 // Send Message router
-router.post("/sendmessage", authenticateToken, async (req, res) => {
+router.post("/sendmessage", async (req, res) => {
   try {
     const { email, message, name } = req.body;
     if (!email || !message || !name) {

@@ -108,7 +108,7 @@ function Dprofile() {
 
       console.log(response.data);
     } catch (error) {
-      toast.error(error.response.data.error, {
+      toast.warning(error.response.data.error, {
         position: "top-center",
         autoClose: 5000,
         hideProgressBar: false,

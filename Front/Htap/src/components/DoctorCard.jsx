@@ -47,7 +47,7 @@ function DoctorCard() {
   return (
     <>
       <ToastContainer />
-      <div className="bg-violet-50 p-3 container mx-auto rounded-lg mt-3 mb-3">
+      <div className="bg-violet-50 p-3  mx-auto rounded-lg mt-3">
         <h3 className="text-violet-800 text-3xl  mt-3 mb-3 text-center font-inter">
           Experienced Doctor's
         </h3>
@@ -60,7 +60,7 @@ function DoctorCard() {
               <img
                 src={`${endpoint}/users/profile/${doctor.d_profile_pic}`}
                 alt={doctor.d_username}
-                className="w-full object-cover h-full rounded-t-lg"
+                className="w-56 object-center object-fill h-56 rounded-t-lg"
               />
               <div className="p-4  w-full text-center">
                 <h4 className="text-violet-800 text-lg font-semibold mb-2">

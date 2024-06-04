@@ -33,8 +33,12 @@ import AdminDatabase from "./components/dashboardcomponents/admin/AdminDatabase"
 import UserNotification from "./components/dashboardcomponents/user/UserNotification";
 import DNotification from "./components/dashboardcomponents/doctor/DNotification";
 import AdminNotification from "./components/dashboardcomponents/admin/AdminNotification";
+import AdminReport from "./components/dashboardcomponents/admin/AdminReport";
+import UserReport from "./components/dashboardcomponents/user/UserReport";
+import DoctorReport from "./components/dashboardcomponents/doctor/DoctorReport";
 import AboutUs from "./components/AboutUs";
 import Contact from "./components/Contact";
+import AuthGuardProfile from "./components/guards/AuthGuardProfile";
 
 function App() {
   const ProfileRouter = () => {
@@ -139,6 +143,23 @@ function App() {
     }
   };
 
+  const ReportRouter = () => {
+    // Retrieve and parse user role from localStorage
+    const userRole = JSON.parse(localStorage.getItem("user"));
+
+    // Check the user's role and render the appropriate component
+    switch (userRole.role) {
+      case "user":
+        return <UserReport />;
+      case "doctor":
+        return <DoctorReport />;
+      case "admin":
+        return <AdminReport />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <BrowserRouter>
@@ -146,33 +167,29 @@ function App() {
           <Route
             path="/"
             element={
-              <AuthGuard allowedRoles={["admin", "user", "doctor"]}>
+              <AuthGuardProfile endpoint={`${import.meta.env.VITE_KEY}`}>
                 <Layout>
                   <Home />
                 </Layout>
-              </AuthGuard>
+              </AuthGuardProfile>
             }
           ></Route>
 
           <Route
             path="/about"
             element={
-              <AuthGuard allowedRoles={["admin", "user", "doctor"]}>
-                <Layout>
-                  <AboutUs />
-                </Layout>
-              </AuthGuard>
+              <Layout>
+                <AboutUs />
+              </Layout>
             }
           ></Route>
 
           <Route
             path="/contact"
             element={
-              <AuthGuard allowedRoles={["admin", "user", "doctor"]}>
-                <Layout>
-                  <Contact />
-                </Layout>
-              </AuthGuard>
+              <Layout>
+                <Contact />
+              </Layout>
             }
           ></Route>
 
@@ -271,6 +288,14 @@ function App() {
               element={
                 <AuthGuard allowedRoles={["user", "admin", "doctor"]}>
                   <NotificationRouter />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="report"
+              element={
+                <AuthGuard allowedRoles={["user", "admin", "doctor"]}>
+                  <ReportRouter />
                 </AuthGuard>
               }
             />

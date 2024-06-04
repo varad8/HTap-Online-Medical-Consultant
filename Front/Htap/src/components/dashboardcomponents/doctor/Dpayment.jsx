@@ -258,6 +258,7 @@ function Dpayment() {
                   <p>
                     {payment.patient.p_firstname} {payment.patient.p_lastname}
                   </p>
+                  <p className="font-inter text-sm">{payment.patient.pid}</p>
                   <p>{payment.patient.p_email}</p>
                   <p>{payment.patient.p_contact}</p>
                 </div>

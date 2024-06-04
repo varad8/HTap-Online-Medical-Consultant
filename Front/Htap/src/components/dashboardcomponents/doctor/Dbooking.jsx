@@ -286,7 +286,7 @@ function Dbooking() {
                 APT. ID {booking.appointment_id}
               </h3>
               <div className="px-3 py-2">
-                <div className="mb-2 border-b border-gary-300 px-3 py-2">
+                <div className="mb-2 border-b border-gary-300 px-3 py-2 text-sm">
                   <p className="font-inter text-sm">
                     Health Issue: {booking.patient_problem}
                   </p>
@@ -314,10 +314,14 @@ function Dbooking() {
                     alt="doctor profile"
                     className="w-20 h-20 rounded-full border border-gray-300"
                   />
-                  <div>
+                  <div className="text-sm">
                     <p className="font-inter text-sm">
                       Patient: {booking.patient.p_firstname}{" "}
                       {booking.patient.p_lastname}
+                    </p>
+
+                    <p className="font-inter text-sm">
+                      PID: {booking.patient.pid}
                     </p>
 
                     <p className="font-inter text-sm">

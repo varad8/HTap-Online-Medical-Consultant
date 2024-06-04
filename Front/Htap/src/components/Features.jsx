@@ -20,9 +20,12 @@ function Features() {
             Easy Make Appointment With Our Best Doctor For Your health
             consultant In Same Day Or Next Day
           </p>
-          <button className="px-3 py-2 bg-white rounded-md text-skyblue">
+          <a
+            href="#booking"
+            className="px-3 py-2 bg-white rounded-md text-skyblue"
+          >
             Make an Appointment
-          </button>
+          </a>
         </div>
 
         {/* Features Grid  */}

@@ -422,6 +422,7 @@ function UserPrescription() {
                         Patient: {prescription.patient.p_firstname}{" "}
                         {prescription.patient.p_lastname}
                       </p>
+                      PID :- {prescription?.patient?.pid}
                       <p className="font-inter text-sm">
                         Email: {prescription.patient.p_email}
                       </p>
@@ -473,13 +474,15 @@ function UserPrescription() {
                 </div>
 
                 <div className="bg-gray-50 py-2 justify-between flex gap-2 px-2">
-                  <button
-                    onClick={() => handleOpenPrescription(prescription)}
-                    type="button"
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-violet-600 text-base font-medium text-white hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 sm:ml-3 sm:w-auto sm:text-sm"
-                  >
-                    View Prescription
-                  </button>
+                  {prescription.pay_status === "Paid" && (
+                    <button
+                      onClick={() => handleOpenPrescription(prescription)}
+                      type="button"
+                      className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-violet-600 text-base font-medium text-white hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 sm:ml-3 sm:w-auto sm:text-sm"
+                    >
+                      View Prescription
+                    </button>
+                  )}
 
                   {prescription.pay_status !== "Paid" && (
                     <button
@@ -565,6 +568,23 @@ function UserPrescription() {
 
                       <p className="font-inter text-xl font-medium text-black py-2">
                         R<sub>x</sub>
+                      </p>
+                      <h2>
+                        Patient Name:-{" "}
+                        {selectedPrescription?.patient?.p_firstname}{" "}
+                        {selectedPrescription?.patient?.p_lastname}
+                      </h2>
+                      <p className="text-sm">
+                        PID :- {selectedPrescription?.patient?.pid}
+                      </p>
+                      <p className="text-sm">
+                        Mobile No :- {selectedPrescription?.patient?.p_contact}
+                      </p>
+                      <p className="text-sm">
+                        Email :- {selectedPrescription?.patient?.p_email}
+                      </p>
+                      <p className="text-sm">
+                        Address :- {selectedPrescription?.patient?.p_add}
                       </p>
                       {medications.map((medication, index) => (
                         <div

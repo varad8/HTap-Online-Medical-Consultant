@@ -224,7 +224,7 @@ function AdminPayment() {
 
               <p className="text-gray-400 mt-2 mb-2">Payment Details</p>
 
-              <p className="text-gray-700 text-base">
+              <p className="text-gray-700 text-base text-sm">
                 Doctor: {payment.doctor.d_username}
                 <br />
                 Prescription ID: {payment.prescription.pres_id}
@@ -253,17 +253,18 @@ function AdminPayment() {
                   className="w-14 h-14 rounded-full border border-gray-200"
                 />
 
-                <div className="flex gap-2 flex-col">
+                <div className="flex gap-2 flex-col text-sm">
                   <p>
                     {payment.patient.p_firstname} {payment.patient.p_lastname}
                   </p>
+                  <p>{payment.patient.pid}</p>
                   <p>{payment.patient.p_email}</p>
                   <p>{payment.patient.p_contact}</p>
                 </div>
               </div>
 
               <p className="text-gray-400 mt-2 mb-2">Doctor Details</p>
-              <div className="flex gap-2 p-2 items-center">
+              <div className="flex gap-2 p-2 items-center text-sm">
                 <img
                   src={`${endpoint}/doctor/profile/${payment.doctor.d_profile_pic}`}
                   alt="patient image"

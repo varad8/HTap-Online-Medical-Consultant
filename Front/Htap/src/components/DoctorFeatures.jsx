@@ -165,12 +165,12 @@ function DoctorFeatures() {
               </div>
 
               <span className="mt-3">
-                <button
-                  type="button"
+                <a
+                  href="#booking"
                   className="bg-yellow_dark text-white px-2 py-3 rounded-lg"
                 >
                   Make an Appointment
-                </button>
+                </a>
               </span>
             </div>
           </div>

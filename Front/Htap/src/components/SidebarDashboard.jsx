@@ -9,6 +9,7 @@ import {
   faBars,
   faBookMedical,
   faBullhorn,
+  faChartColumn,
   faCheck,
   faCheckCircle,
   faDatabase,
@@ -53,22 +54,22 @@ function SidebarDashboard() {
 
       try {
         const response = await axios.get(
-          `${endpoint}/users/profile/get/${session.id}`,
+          `${endpoint}/users/profile/get/${session?.id}`,
           config
         );
         setProfileData(response.data);
       } catch (error) {
-        toast.error(error.response.data.error, {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
-        });
+        // toast.error(error.response.data.error, {
+        //   position: "top-center",
+        //   autoClose: 5000,
+        //   hideProgressBar: false,
+        //   closeOnClick: true,
+        //   pauseOnHover: true,
+        //   draggable: true,
+        //   progress: undefined,
+        //   theme: "light",
+        //   transition: Bounce,
+        // });
       }
     };
 
@@ -276,7 +277,7 @@ function SidebarDashboard() {
           </ul>
           <ul className="pt-5 mt-5 space-y-2 border-t border-gray-200 dark:border-gray-700">
             {/* Messages */}
-            {session.role != "admin" && (
+            {session?.role != "admin" && (
               <li>
                 <Link
                   to="messages"
@@ -296,7 +297,7 @@ function SidebarDashboard() {
             )}
 
             {/* Category */}
-            {session.role === "admin" && (
+            {session?.role === "admin" && (
               <li>
                 <Link
                   to="category"
@@ -317,8 +318,27 @@ function SidebarDashboard() {
               </li>
             )}
 
+            {/* Report */}
+
+            <li>
+              <Link
+                to="report"
+                className={`flex items-center p-2 text-base font-inter font-normal text-violet-900 rounded-lg dark:text-white group ${
+                  location.pathname === "/dashboard/report"
+                    ? "bg-violet-100"
+                    : ""
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={faChartColumn}
+                  className="w-6 h-6 text-violet-500"
+                />
+                <span className="flex-1 ml-3 whitespace-nowrap">Report</span>
+              </Link>
+            </li>
+
             {/* Database */}
-            {session.role === "admin" && (
+            {session?.role === "admin" && (
               <li>
                 <Link
                   to="database"

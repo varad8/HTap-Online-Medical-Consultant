@@ -32,17 +32,7 @@ function DoctorSearchModal({ doctorData, isOpen, handleClose, timeforbooked }) {
         setProfile(response?.data);
         console.log(response?.data);
       } catch (error) {
-        toast.error(error.response.data.error, {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
-        });
+        console.log(error?.response?.data?.error);
       }
     };
 
@@ -91,9 +81,35 @@ function DoctorSearchModal({ doctorData, isOpen, handleClose, timeforbooked }) {
 
   //save booking
   const handleSaveBooking = async (doctor) => {
-    setSelectedDoctor(doctor);
-    setDate(timeforbooked);
-    handleOpenBookingModal();
+    if (session?.role === "user") {
+      setSelectedDoctor(doctor);
+      setDate(timeforbooked);
+      handleOpenBookingModal();
+    } else if (!session?.role) {
+      toast.warn("Please log in first to book an appointment.", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    } else {
+      toast.info("This booking feature works only for patients. !!", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
   };
 
   const handleSubmitPatientInfo = async () => {
@@ -142,28 +158,57 @@ function DoctorSearchModal({ doctorData, isOpen, handleClose, timeforbooked }) {
   };
 
   const activateChat = async (doctorProfile) => {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
+    if (session?.role === "user") {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
 
-    try {
-      const userId = `user${session.id}`;
-      const docId = `doctor${doctorProfile.d_id}`;
-      const patient = userprofile._id;
-      const doctor = doctorProfile._id;
-      const uid = session.id;
-      const did = doctorProfile.d_id;
+      try {
+        const userId = `user${session.id}`;
+        const docId = `doctor${doctorProfile.d_id}`;
+        const patient = userprofile._id;
+        const doctor = doctorProfile._id;
+        const uid = session.id;
+        const did = doctorProfile.d_id;
 
-      // Request to create a new chat room
-      const response = await axios.post(
-        `${endpoint}/chatrooms`,
-        { userId, docId, patient, doctor, uid, did },
-        config
-      );
+        // Request to create a new chat room
+        const response = await axios.post(
+          `${endpoint}/chatrooms`,
+          { userId, docId, patient, doctor, uid, did },
+          config
+        );
 
-      toast.success("Chat Room Activated", {
+        toast.success("Chat Room Activated", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        });
+
+        console.log("Chat room created:", response?.data);
+        navigate(`/dashboard/messages/${response.data.chatRoomId}`);
+      } catch (error) {
+        toast.error(error.response.data.error, {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        });
+      }
+    } else if (!session?.role) {
+      toast.warn("Please log in first to activate chat.", {
         position: "top-center",
         autoClose: 5000,
         hideProgressBar: false,
@@ -174,11 +219,8 @@ function DoctorSearchModal({ doctorData, isOpen, handleClose, timeforbooked }) {
         theme: "light",
         transition: Bounce,
       });
-
-      console.log("Chat room created:", response?.data);
-      navigate(`/dashboard/messages/${response.data.chatRoomId}`);
-    } catch (error) {
-      toast.error(error.response.data.error, {
+    } else {
+      toast.info("This chat feature works only for patients. !!", {
         position: "top-center",
         autoClose: 5000,
         hideProgressBar: false,

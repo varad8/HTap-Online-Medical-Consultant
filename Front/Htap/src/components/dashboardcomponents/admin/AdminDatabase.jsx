@@ -271,6 +271,7 @@ function AdminDatabase() {
                 <thead>
                   <tr className="bg-violet-600 text-white text-nowrap">
                     <th className="px-4 py-2">Profile Pic</th>
+                    <th className="px-4 py-2">DID</th>
                     <th className="px-4 py-2">First Name</th>
                     <th className="px-4 py-2">Last Name</th>
                     <th className="px-4 py-2">Email</th>
@@ -292,6 +293,7 @@ function AdminDatabase() {
                           className="w-24 h-24 rounded-lg object-cover object-center"
                         />
                       </td>
+                      <td className="border px-4 py-2">{doctor.d_id}</td>
                       <td className="border px-4 py-2">{doctor.d_firstname}</td>
                       <td className="border px-4 py-2">{doctor.d_lastname}</td>
                       <td className="border px-4 py-2">{doctor.d_email}</td>
@@ -391,6 +393,7 @@ function AdminDatabase() {
                 <thead>
                   <tr className="bg-violet-600 text-white text-nowrap">
                     <th className="px-4 py-2">Profile Pic</th>
+                    <th className="px-4 py-2">PID</th>
                     <th className="px-4 py-2">First Name</th>
                     <th className="px-4 py-2">Last Name</th>{" "}
                     <th className="px-4 py-2">Email</th>
@@ -408,6 +411,7 @@ function AdminDatabase() {
                           className="w-24 h-24 rounded-lg object-cover object-center"
                         />
                       </td>
+                      <td className="border px-4 py-2">{patient.pid}</td>
                       <td className="border px-4 py-2">
                         {patient.p_firstname}
                       </td>
